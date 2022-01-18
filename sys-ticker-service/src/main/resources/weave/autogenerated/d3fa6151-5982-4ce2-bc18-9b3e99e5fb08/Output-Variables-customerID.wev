@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_d3fa6151_5982_4ce2_bc18_9b3e99e5fb08_Output_Variables_customerID = Any
+

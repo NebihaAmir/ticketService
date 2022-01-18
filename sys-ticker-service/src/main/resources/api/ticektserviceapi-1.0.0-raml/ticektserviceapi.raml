@@ -1,0 +1,26 @@
+#%RAML 1.0
+title: ticektServiceAPI
+
+uses:
+  lib: library.raml
+
+/customers:
+  type:
+    lib.usersResponce
+
+  is:
+    - lib.userTraits
+    - lib.auth
+    
+  /{customer}:  
+    type:
+      lib.userResponce
+    is:
+      - lib.userTraits
+      - lib.auth
+
+
+
+
+
+         

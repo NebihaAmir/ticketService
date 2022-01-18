@@ -1,0 +1,13 @@
+host:
+  name: "localhost"  
+  port: "3306"
+  username: "root"
+  pwd: "root@123"
+  dbname: ticketService
+  
+  
+
+
+
+  
+  

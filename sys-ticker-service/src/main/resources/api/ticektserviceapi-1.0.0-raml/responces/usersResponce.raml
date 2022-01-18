@@ -1,0 +1,32 @@
+#%RAML 1.0 ResourceType
+get:
+  responses:
+    200:
+      body:
+        application/json:
+          example:
+            !include ../examples/users.raml
+post:
+  responses:
+    201:
+      body:
+        application/json:
+          example:
+            !include ../examples/complited.raml
+put:
+  responses:
+    200:
+      body:
+        application/json:
+          example:
+            !include ../examples/complited.raml  
+delete:
+  responses:
+    200:
+      body:
+        application/json:
+          example:
+            !include ../examples/complited.raml          
+        
+
+          

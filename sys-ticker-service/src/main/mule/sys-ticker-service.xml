@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="8f8ad378-f27a-43d1-8388-308f9adbb0f6" >
+		<db:my-sql-connection host="${host.name}" port="${host.port}" user="${host.username}" password="${host.pwd}" database="${host.dbname}"/>
+	</db:config>
+	<configuration-properties doc:name="Configuration properties" doc:id="bb1597cb-a733-4f8f-9db1-a84a4b533ac4" file="testdb.yaml" />
+	<sub-flow name="customerID" doc:id="d3fa6151-5982-4ce2-bc18-9b3e99e5fb08" >
+		<set-variable value="#[attributes.uriParams.customerID]" doc:name="customerID" doc:id="1e4f4bfd-2adb-4560-a5fc-8aedbf14850f" variableName="customerID" />
+	</sub-flow>
+	<flow name="getcustomerByID" doc:id="0cba304a-3a7c-4d41-80d1-bf07526a9bec" >
+		<db:select doc:name="get customer by id" doc:id="3b2f1e22-edae-4227-8de5-78b29bbe3adb" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from customers where customerID = :customerID;]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	customerID: attributes.uriParams.customerID
+	
+	}]]]></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="customer payload" doc:id="6f948836-3fea-46f5-9df6-86495f788c4e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getCustomers" doc:id="620913a7-9bfc-4323-8e27-34b5ac0e03cd" >
+		<db:select doc:name="customerData" doc:id="ae158945-3688-455b-8221-783db7fa0587" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from customers;]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="customer payload" doc:id="2b0dbad8-5ceb-45a3-a292-e14026d47139" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="postCustomers" doc:id="31cec5fa-35bb-4ca6-8ab8-d41a1131c07c" >
+		<db:bulk-insert doc:name="customersBuilkData" doc:id="8ae1c249-c2ac-4319-ab16-058d828163d5" config-ref="Database_Config">
+			<db:bulk-input-parameters ><![CDATA[#[payload map  {
+	firstname: $.firstname,
+	lastname: $.lastname,
+	email: $.email,
+	age: $.age,
+	phoneNo: $.phoneNo,
+	city: $.city,
+	state: $.state
+	
+}]]]></db:bulk-input-parameters>
+			<db:sql ><![CDATA[insert into customers (firstname, lastname, email, age,
+ phoneNo, city, state) 
+values (:firstname, :lastname, :email, :age,
+ :phoneNo, :city, :state);
+]]></db:sql>
+		</db:bulk-insert>
+		<ee:transform doc:name="customer payload" doc:id="f794e819-caf2-48e8-ba20-a37aaefd634d" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "customer data submitted"
+}
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="updateCustomersData" doc:id="a4ee1cb0-667f-49b6-878e-9c64ce53b15a" >
+		<db:bulk-update doc:name="update customers" doc:id="2febb7c0-cac0-44c0-a6a6-719e7a2777ba" config-ref="Database_Config">
+			<db:bulk-input-parameters ><![CDATA[#[payload map  {
+	customerID: $.customerID,
+	firstname: $.firstname,
+	lastname: $.lastname,
+	email: $.email,
+	age: $.age,
+	phoneNo: $.phoneNo,
+	city: $.city,
+	state: $.state
+	
+}]]]></db:bulk-input-parameters>
+			<db:sql ><![CDATA[UPDATE customers
+SET firstname = :firstname, lastname = :lastname,
+age = :age, email = :email, phoneNo = :phoneNo, city = :city,
+state = :state
+WHERE customerID = :customerID;]]></db:sql>
+		</db:bulk-update>
+		<ee:transform doc:name="customer payload" doc:id="9738e25e-682b-419f-bd66-72831db39619" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "customer data updated"
+}
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="updateCustomer" doc:id="fe9ec35a-2061-4a36-98c8-ad38fa18b29b" >
+		<flow-ref doc:name="customerID" doc:id="8473f406-0bd2-4b48-8ed0-862ba8ed95f6" name="customerID"/>
+		<db:update doc:name="Update" doc:id="ba6b0455-8144-4dcc-ac8d-e6b335aeb085" config-ref="Database_Config">
+			<db:sql ><![CDATA[UPDATE customers
+SET firstname = :firstname, lastname = :lastname,
+age = :age, email = :email, phoneNo = :phoneNo, city = :city,
+state = :state
+WHERE customerID = :customerID;]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+		
+		firstname: payload.firstname,
+		lastname: payload.lastname,
+		age: payload.age,
+		email: payload.email,
+		phoneNo: payload.phoneNo,
+		city: payload.city,
+		state: payload.state
+		
+}]]]></db:input-parameters>
+		</db:update>
+		<ee:transform doc:name="Transform Message" doc:id="8a628d6f-6764-47aa-b8d6-50f553e44251" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	"message": "customer data updated"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="deleteCustomer" doc:id="3f7fcc31-692f-43a4-8e87-6544d0ad998f" >
+		<flow-ref doc:name="customerID" doc:id="de6dc550-0125-425f-ac74-b059527711a2" name="customerID"/>
+		<db:delete doc:name="delete customer" doc:id="371907d6-2714-4003-b0cf-9f1dc9c12269" config-ref="Database_Config">
+			<db:sql ><![CDATA[delete from customers where customerID = :customerID;]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	customerID: vars.customerID
+}]]]></db:input-parameters>
+		</db:delete>
+		<ee:transform doc:name="customer payload" doc:id="ad1a809e-d85d-454c-a0e5-c8d76df88bfe" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "customers data deleted"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="deleteCustomers" doc:id="ba3580a2-e193-4067-a959-7bb8cb123e3f" >
+		<db:bulk-delete doc:name="delete customers" doc:id="0832585e-e04b-4fe8-b2a5-6ffba92971a8" config-ref="Database_Config">
+			<db:bulk-input-parameters ><![CDATA[#[payload map (value, index) -> {
+	customerID: value.customerID
+
+}]]]></db:bulk-input-parameters>
+			<db:sql ><![CDATA[delete from customers where customerID = :customerID]]></db:sql>
+		</db:bulk-delete>
+		<ee:transform doc:name="Transform Message" doc:id="19858055-0a52-4838-a2b6-1ccff8b7c7bd" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	"message": "customer data deleted"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

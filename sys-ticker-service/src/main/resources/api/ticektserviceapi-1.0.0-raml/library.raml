@@ -1,0 +1,10 @@
+#%RAML 1.0 Library
+usage: Library 
+
+traits:
+  userTraits: !include traits/userTrait.raml
+  auth: !include traits/auth.raml
+resourceTypes:
+  usersResponce: !include responces/usersResponce.raml
+  userResponce: !include responces/userResponce.raml
+
