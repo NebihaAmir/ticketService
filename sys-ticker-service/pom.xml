@@ -29,6 +29,7 @@
 				<artifactId>mule-maven-plugin</artifactId>
 				<version>${mule.maven.plugin.version}</version>
 				<extensions>true</extensions>
+				
 				<configuration>
 					<sharedLibraries>
 						<sharedLibrary>
@@ -36,6 +37,19 @@
 							<artifactId>mysql-connector-java</artifactId>
 						</sharedLibrary>
 					</sharedLibraries>
+					
+		
+					<cloudHubDeployment>
+                        <uri>https://anypoint.mulesoft.com</uri>
+                        <muleVersion>4.2.2</muleVersion>
+                        <username>nebcraftsoftware</username>
+                        <password>Nebihaamir@123</password>
+                        <applicationName>ticket-service</applicationName>
+                        <environment>Sandbox</environment>
+                        <workerType>MICRO</workerType>
+                        <objectStoreV2>true</objectStoreV2>
+                    </cloudHubDeployment>
+					
 				</configuration>
 			</plugin>
 		</plugins>
